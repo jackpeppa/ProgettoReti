@@ -133,9 +133,6 @@
               </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="labelLog">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="ciao"/>
-              </Properties>
             </Component>
           </SubComponents>
         </Container>
@@ -225,9 +222,6 @@
               </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="labelReg">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="ciao"/>
-              </Properties>
             </Component>
           </SubComponents>
         </Container>

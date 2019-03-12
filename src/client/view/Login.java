@@ -100,8 +100,6 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
-        labelLog.setText("ciao");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -152,8 +150,6 @@ public class Login extends javax.swing.JFrame {
         jLabel4.setText("Password");
 
         fieldPasswordReg.setToolTipText("");
-
-        labelReg.setText("ciao");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
