@@ -6,6 +6,7 @@
 package server.model;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  *
@@ -16,6 +17,7 @@ public class Documento {
     private final String creatore;
     private int numSezioni;
     private ArrayList<String> ammessi;   //ammessi a modificarlo
+    private ArrayList<String>  editors;  //nome di chi sta editando la sezione i-esima
     private Boolean[] sezioni;  //true->in editing; false->libera
     
     public Documento(String nome, String creatore, int numSezioni)
@@ -25,6 +27,9 @@ public class Documento {
         this.ammessi = new ArrayList<String>();
         this.numSezioni = numSezioni;
         this.sezioni = new Boolean[numSezioni];
+        this.editors = new ArrayList<String>(numSezioni);
+        for(int i =0;i< numSezioni;i++)
+            editors.add("");
     }
     
     
@@ -55,6 +60,7 @@ public class Documento {
         else
         {
             sezioni[n] = Boolean.TRUE;
+            editors.set(n, nome);
             return true;
         }
         
@@ -65,11 +71,30 @@ public class Documento {
         if(n>numSezioni || n<0)
             return;
         sezioni[n]=Boolean.FALSE;
+        editors.set(n, "");
     }
     
     public ArrayList<String> getAmmessi()
     {
         return (ArrayList<String>)ammessi.clone();
+    }
+    
+    public ArrayList<String> getEditors()
+    {
+        return (ArrayList<String>)editors.clone();
+    }
+    
+    public String getEditor(int section)
+    {
+        String temp = editors.get(section);
+        if(sezioni[section]== Boolean.FALSE)
+            return "";
+        return editors.get(section);
+    }
+    
+    public int getNumOfSections()
+    {
+        return numSezioni;
     }
     
     

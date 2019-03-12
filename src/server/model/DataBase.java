@@ -194,6 +194,51 @@ public class DataBase {
         return new String(builder);
     }
     
+    //stringa con stato attuale delle sezioni(se in editing, e da chi), null se il doc non esiste
+    public static String getListOfSectionsInEditing(String docName)
+    {
+        Documento d = documenti.get(docName);
+        if(d==null)
+            return null;
+        ArrayList<String> list;
+        synchronized(d)
+        {
+            list = d.getEditors();
+        }
+        StringBuilder b = new StringBuilder();
+        b.append("Stato sezioni del Documento "+docName+" : ");
+        int i=0;
+        for(String s: list)
+        {
+            String temp;
+            if(s.equals(""))
+            {
+                temp = (" "+i+" : "+"free, ");
+            }
+            else
+            {
+                temp = (" "+i+" : "+s+" sta editando, ");
+            }
+            b.append(temp);
+            i++;
+        }
+        return new String(b);
+    }
+    //null se il doc non esiste, stringa vuota se nessuno sta editando, nome utente altrimenti
+    public static String getEditor(String docName, int section)
+    {
+        Documento d = documenti.get(docName);
+        String temp;
+        if(d==null)
+            return null;
+        synchronized(d)
+        {
+            temp = d.getEditor(section);
+        }
+        return temp;
+        
+    }
+    
     //true -> username ora puo editare il documento
     public static Boolean addAmmesso(String nomeDoc, String username, String creatore)
     {
@@ -234,6 +279,19 @@ public class DataBase {
         if(u==null)
             return;
         u.setInvitesStream(out);
+    }
+    
+    public static int getNumOfSections(String docName)
+    {
+        Documento doc = documenti.get(docName);
+        if(doc==null)
+            return -1;
+        int n;
+        synchronized(doc)
+        {
+            n = doc.getNumOfSections();
+        }
+        return n;
     }
     
 }

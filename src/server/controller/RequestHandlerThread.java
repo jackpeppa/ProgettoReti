@@ -25,6 +25,12 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import common.Configuration;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.net.InetSocketAddress;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import org.json.simple.parser.JSONParser;
 
 /**
@@ -39,6 +45,7 @@ public class RequestHandlerThread implements Runnable {
     private DataOutputStream toClient;
     private DataOutputStream toClientNotify;
     private String username = "";      //username client loggato
+    private SocketChannel fileChannel; //channel per inviare i file
     
     public RequestHandlerThread (Socket client) 
     {
@@ -81,13 +88,23 @@ public class RequestHandlerThread implements Runnable {
                             response.setType(typePack.OP_OK);
                            
                             ServerSocket sock = new ServerSocket(0);  //porta casuale libera
+                            ServerSocketChannel sockChannel = ServerSocketChannel.open();
+                            sockChannel.socket().bind(new InetSocketAddress(Configuration.SERVER_NAME, 0));
+                            int chPort = sockChannel.socket().getLocalPort();
                             int port = sock.getLocalPort();
                             response.addCampo("porta", Integer.toString(port));
+                            response.addCampo("filePort", Integer.toString(chPort));
 
                             response.writePacket(toClient);
 
                             sock.setSoTimeout(5000);
+                            sockChannel.socket().setSoTimeout(5000);
                             notifySock = sock.accept();
+                            fileChannel = sockChannel.accept();
+                            
+                            sock.close();
+                            sockChannel.close();
+                            
                             toClientNotify = new DataOutputStream(new BufferedOutputStream(notifySock.getOutputStream()));
                             DataBase.setInvitesStream(username, toClientNotify);
                             
@@ -172,7 +189,33 @@ public class RequestHandlerThread implements Runnable {
                    
                    case SHOW_DOC:
                    {
+                       String doc = request.getCampo("doc");
+                       String editors = DataBase.getListOfSectionsInEditing(doc);
+                       if(editors==null)  //se il doc non esiste
+                       {
+                           response.setType(typePack.OP_ERR);
+                           response.writePacket(toClient);
+                           break;
+                       }
+                       response.setType(typePack.OP_OK);
+                       response.addCampo("editors", editors);
                        
+                       int numOfSections= DataBase.getNumOfSections(doc);
+                       long dim=0;
+                       for(int i = 0; i< numOfSections;i++)  //calcolo dimensione documento
+                       {
+                           dim += Files.size(Paths.get(Configuration.DOCS_DIRECTORY_NAME+"/"+doc+"/"+Integer.toString(i)+".txt"));
+                       }
+                       response.addCampo("dim", Long.toString(dim));
+                       
+                       response.writePacket(toClient);
+                       
+                       for(int i =0; i< numOfSections; i++)  //invio il documento
+                       {
+                           sendSection(fileChannel, i, doc);
+                       }
+                       
+                       break;
                    }
                    
                    case SHOW_SEC:
@@ -212,6 +255,7 @@ public class RequestHandlerThread implements Runnable {
                 toClientNotify.close();
                 requestSock.close();
                 notifySock.close();
+                fileChannel.close();
                 
                 DataBase.rilasciaSezioni(username);
                 
@@ -232,6 +276,20 @@ public class RequestHandlerThread implements Runnable {
         }
         
     }
+    
+    //invia sezione al client con NIO
+    private void sendSection(SocketChannel channel, int section, String docName) throws FileNotFoundException, IOException
+    {
+        System.out.println("send section: " +channel.toString()+section+docName);
+        FileInputStream fis = new FileInputStream(Configuration.DOCS_DIRECTORY_NAME+"/"+docName+"/"+Integer.toString(section)+".txt");
+        FileChannel ch = fis.getChannel();
+        System.out.println(ch.toString());
+        ch.transferTo(0, ch.size(), channel);
+        ch.close();
+        fis.close();
+    }
+    
+    
     
     
     

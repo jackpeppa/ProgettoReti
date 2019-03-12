@@ -22,6 +22,17 @@ import common.Configuration;
 import common.Packet;
 import common.typePack;
 import client.view.Logged;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  *
@@ -37,6 +48,7 @@ public class ControlListener implements ActionListener {
     private DataOutputStream toServer;
     private DataInputStream fromServer;
     private String username="";          //nome utente
+    private SocketChannel serverChannel;
     
     public ControlListener(RegistrationInterface serverInterface)
     {
@@ -71,6 +83,8 @@ public class ControlListener implements ActionListener {
                 
                 
                 
+                
+                
                 Packet req = new Packet(typePack.LOGIN);
                 req.addCampo("username", username);
                 req.addCampo("password", password);
@@ -83,6 +97,7 @@ public class ControlListener implements ActionListener {
                 
                 if(req.getType().equals(typePack.OP_OK))
                 {
+                    serverChannel = SocketChannel.open(new InetSocketAddress(Configuration.SERVER_NAME, Integer.parseInt((String)req.getCampo("filePort"))));
                     login.setlabelLog("CAMPI VALIDI", Color.green);
                     login.dispose();
                     logged = new Logged(this);
@@ -92,7 +107,12 @@ public class ControlListener implements ActionListener {
                     
                 }
                 else
+                {
                     login.setlabelLog("CAMPI NON VALIDI", Color.red);
+                    fromServer.close();
+                    toServer.close();
+                    server.close();
+                }
                 
                 
                 break;    
@@ -213,11 +233,80 @@ public class ControlListener implements ActionListener {
                 break;    
             }
             
+            case "show":
+            {
+                String nomeDoc = logged.getShowNameField();
+                String sez = logged.getShowNumField();
+                
+                if(nomeDoc.equals("")){
+                    logged.setShowLabel("INSERIRE NOME DOCUMENTO", Color.red);
+                    break;
+                }
+                
+                Packet req;
+                if(sez.equals(""))
+                {
+                    req = new Packet(typePack.SHOW_DOC);
+                    req.addCampo("doc", nomeDoc);
+                    req.writePacket(toServer);
+                    
+                    req.readPacket(fromServer);
+                    if(req.getType().equals(typePack.OP_ERR))
+                    {
+                        logged.setShowLabel("DOCUMENTO INESISTENTE", Color.red);
+                        break;
+                    }
+                    
+                    String sectionsInEditing = req.getCampo("editors");
+                    logged.appendShowTextArea(nomeDoc+" ----> "+sectionsInEditing+"\n\n\n");
+                    
+                    Long dimension = Long.parseLong(req.getCampo("dim"));
+                    
+                    receiveDoc(serverChannel, nomeDoc, dimension);
+                    logged.setShowLabel("DOCUMENTO SCARICATO CON SUCCESSO", Color.green);
+                    break;
+                }
+                else
+                {
+                    
+                }
+                
+                
+            }
+            
             
     }
     
     }catch(Exception ex){ex.printStackTrace();}
+        /*finally{
+            try
+            {
+                    fromServer.close();
+                    toServer.close();
+                    server.close();
+                    serverChannel.close();
+            }catch(Exception ex2){ex2.printStackTrace();}
+        }*/
     }
+    
+    //legge dim byte dalla socket e crea il file nella cartella predefinita
+    private void receiveDoc(SocketChannel ch, String nomeDoc, Long dimension) throws FileNotFoundException, IOException
+    {
+          Path path = Paths.get(Configuration.CLIENT_DOCS_DIRECTORY_NAME+"/"+nomeDoc+".txt");
+          try{
+              Files.createFile(path);
+          }catch(FileAlreadyExistsException ex){
+                Files.delete(path);
+                Files.createFile(path);
+                }
+          FileOutputStream fis = new FileOutputStream(Configuration.CLIENT_DOCS_DIRECTORY_NAME+"/"+nomeDoc+".txt");
+          FileChannel fileCh = fis.getChannel();
+          fileCh.transferFrom(ch, 0, dimension);
+          fileCh.close();
+          fis.close();
+    }
+    
+    
 }
             
     

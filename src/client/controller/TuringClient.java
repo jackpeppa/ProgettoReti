@@ -10,6 +10,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import common.Configuration;
 import client.view.Login;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  *
@@ -27,6 +30,10 @@ public class TuringClient {
            reg = LocateRegistry.getRegistry(Configuration.SERVER_NAME,Configuration.SERVER_RMI_PORT);
            serverInterface = (RegistrationInterface)reg.lookup(Configuration.SERVER_RMI_NAME);
        }catch(Exception e){e.printStackTrace();}
+       
+       try{
+            Files.createDirectory(Paths.get(Configuration.CLIENT_DOCS_DIRECTORY_NAME));  //dove salvo i files
+            }catch(Exception ex){ex.printStackTrace();}
        
         
        ControlListener controlListener = new ControlListener(serverInterface);
