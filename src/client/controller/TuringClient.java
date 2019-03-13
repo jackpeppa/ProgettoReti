@@ -33,7 +33,7 @@ public class TuringClient {
        
        try{
             Files.createDirectory(Paths.get(Configuration.CLIENT_DOCS_DIRECTORY_NAME));  //dove salvo i files
-            }catch(Exception ex){ex.printStackTrace();}
+            }catch(Exception ex){}
        
         
        ControlListener controlListener = new ControlListener(serverInterface);

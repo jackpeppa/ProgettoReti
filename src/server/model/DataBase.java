@@ -5,9 +5,14 @@
  */
 package server.model;
 
+import common.Configuration;
 import java.io.DataOutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,6 +24,7 @@ public class DataBase {
     private static DataBase instance =null;
     private static ConcurrentHashMap<String, Utente> utenti;
     private static ConcurrentHashMap<String, Documento> documenti;
+    private static HashSet<String> multicastAddresses;   //contiene ip multicast usati(1 per documento)
     
     
     private DataBase()
@@ -30,6 +36,7 @@ public class DataBase {
         {
             utenti =new ConcurrentHashMap<String,Utente>();
             documenti = new ConcurrentHashMap<String, Documento>();
+            multicastAddresses = new HashSet<String>();
             instance = new DataBase();
         }
         return instance;
@@ -84,28 +91,31 @@ public class DataBase {
         }
         return false;
     }
-    
-    public Boolean editDocumento(String nomeUtente,String nomeDocumento,int sezione)
+    //1 se nomeducumento o sezione non esistono, 2 se è già in editing, 0 se l'utente lo può editare, 3 se l'utente non è ammesso
+    public static int editDocumento(String nomeUtente,String nomeDocumento,int sezione)
     {
         Documento d = documenti.get(nomeDocumento);
         Utente u = utenti.get(nomeUtente);
         
         if(d==null || u==null)
-            return false;
-        
-        Boolean resp;
+            return 1;
+        int resp;
         synchronized(d)
         {
             resp= d.richiediSezione(sezione, nomeUtente);
         }
-        if(!resp)
-            return false;
+        if(resp == 1)
+            return 1;
+        else if(resp == 2)
+            return 2;
+        else if(resp == 3)
+            return 3;
         synchronized(u)
         {
             u.setInEdit(nomeDocumento,sezione);
         }
         
-        return true;                 
+        return 0;                 
     }
     
     
@@ -144,6 +154,7 @@ public class DataBase {
     
     public static Boolean addDocumento(String nome, String creatore, int numSez)
     {
+        try{Paths.get(Configuration.DOCS_DIRECTORY_NAME+"/"+nome);}catch(Exception e){return false;}  //verifico che il nome sia valido
         Documento newDoc = new Documento(nome, creatore, numSez);
         
         Utente u = utenti.get(creatore);
@@ -154,9 +165,36 @@ public class DataBase {
             {
                 u.addDocCreato(nome);
             }
+            //genero indirizzo multicast
+            Random r = new Random();
+            InetAddress inetAddr = null;
+            String addr= null;
+            synchronized(multicastAddresses)
+            {
+                do{
+                    addr = "239." + r.nextInt(256) + "." + r.nextInt(256) + "." + r.nextInt(256);
+                    try{
+                    inetAddr = InetAddress.getByName(addr);
+                    }catch(UnknownHostException ex){ex.printStackTrace();}
+
+                }while(!inetAddr.isMulticastAddress() || multicastAddresses.contains(addr));
+                multicastAddresses.add(addr);
+            }
+            
+            synchronized(newDoc)
+            {
+                newDoc.setMulticastAddr(addr);
+            }
             return true;
         }
         return false;
+    }
+    
+    public static String getMulticastAddr(String nomeDoc)
+    {
+        Documento doc = documenti.get(nomeDoc);
+        if(doc == null) return null;
+        return doc.getMulticastAddr();
     }
     
     //restituisce lista documenti modificabili dall'utente
@@ -224,7 +262,7 @@ public class DataBase {
         }
         return new String(b);
     }
-    //null se il doc non esiste, stringa vuota se nessuno sta editando, nome utente altrimenti
+    //null se il doc non esiste o la sezione non esiste, stringa vuota se nessuno sta editando, nome utente altrimenti
     public static String getEditor(String docName, int section)
     {
         Documento d = documenti.get(docName);
@@ -233,6 +271,9 @@ public class DataBase {
             return null;
         synchronized(d)
         {
+            int numOfSections = d.getNumOfSections();
+            if(section>=numOfSections || section < 0)
+                return null;
             temp = d.getEditor(section);
         }
         return temp;

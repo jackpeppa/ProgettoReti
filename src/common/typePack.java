@@ -12,17 +12,19 @@ package common;
 public enum typePack 
 {
     LOGIN,
-    DEFAULT,
+    DEFAULT,  //default, non usata nella comunicazione
     LOGOUT,
-    OP_ERR,
+    OP_ERR,   //errore generico
     CREATE,
     SHOW_DOC,
     SHOW_SEC,
-    LIST,
+    LIST,     //lista documenti
     SHARE,
     EDIT,
     END_EDIT,
-    OP_OK;
+    OP_ERR_SECTION,    //sezione già in editing
+    OP_ERR_NOT_INVITED,   //utente non abilitato a modificare il documento
+    OP_OK;          //tutto a buon fine
     public static typePack FromString(String s)
     {
         if(s.equals("LOGIN"))
@@ -49,6 +51,10 @@ public enum typePack
             return END_EDIT;
         else if(s.equals("EDIT"))
             return EDIT;
+        else if(s.equals("OP_ERR_SECTION"))
+            return OP_ERR_SECTION;
+        else if(s.equals("OP_ERR_NOT_INVITED"))
+            return OP_ERR_NOT_INVITED;
         else
             return null;
     }

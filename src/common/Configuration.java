@@ -17,6 +17,8 @@ public class Configuration {
     public static final int SERVER_TCP_PORT=9998;  //porta principale
     public static final int INVITE_TCP_PORT=9999;   //porta inviti
     
+    public static final int CLIENT_CHAT_PORT=4321;  //porta chat
+    
     public static final String DOCS_DIRECTORY_NAME = "./turing_docs";  //dove salvo i documenti sul server
     
     public static final String CLIENT_DOCS_DIRECTORY_NAME = "./client_turing_docs"; //dove salvo i documenti sul client

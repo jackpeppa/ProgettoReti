@@ -6,7 +6,6 @@
 package server.model;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 /**
  *
@@ -19,6 +18,7 @@ public class Documento {
     private ArrayList<String> ammessi;   //ammessi a modificarlo
     private ArrayList<String>  editors;  //nome di chi sta editando la sezione i-esima
     private Boolean[] sezioni;  //true->in editing; false->libera
+    private String multicastAddr;
     
     public Documento(String nome, String creatore, int numSezioni)
     {
@@ -30,6 +30,16 @@ public class Documento {
         this.editors = new ArrayList<String>(numSezioni);
         for(int i =0;i< numSezioni;i++)
             editors.add("");
+    }
+    
+    public String getMulticastAddr()
+    {
+        return this.multicastAddr;
+    }
+    
+    public void setMulticastAddr(String s)
+    {
+        multicastAddr = s;
     }
     
     
@@ -48,20 +58,20 @@ public class Documento {
         if(!ammessi.contains(nome))
             ammessi.add(nome);
     }
-    
-    public Boolean richiediSezione(int n, String nome)
+    // 0 ok, 1 sezione inesistente, 2 occupato, 3 utente non ammesso
+    public int richiediSezione(int n, String nome)
     {
         if(n>numSezioni || n < 0)
-            return false;
+            return 1;
         else if(sezioni[n]==Boolean.TRUE)
-            return false;
+            return 2;
         else if(!(nome.equals(creatore) || ammessi.contains(nome)))
-            return false;
+            return 3;
         else
         {
             sezioni[n] = Boolean.TRUE;
             editors.set(n, nome);
-            return true;
+            return 0;
         }
         
     }

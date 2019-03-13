@@ -5,6 +5,7 @@
  */
 package client.controller;
 
+import client.view.Editing;
 import common.RegistrationInterface;
 import java.awt.Color;
 import client.view.Login;
@@ -15,7 +16,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.rmi.RemoteException;
 import common.Configuration;
@@ -26,6 +26,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
@@ -33,6 +36,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  *
@@ -40,15 +45,24 @@ import java.nio.file.Paths;
  */
 public class ControlListener implements ActionListener {
     
-    private Login login;
-    private Logged logged;
+    private Login login;   //form login
+    private Logged logged;   //form principale
+    private Editing editing;  //form di editing
     private RegistrationInterface serverInterface;
     private Socket server;
-    private Thread listingThread;
+    private Thread listingThread;     //thread inviti
+    private Thread chatThread;        //thread chat multicast
     private DataOutputStream toServer;
     private DataInputStream fromServer;
     private String username="";          //nome utente
-    private SocketChannel serverChannel;
+    private SocketChannel serverChannel;   //channel per i files dei documenti
+    
+    private DatagramSocket chatSocket; //dove spedisco i messaggi della chat
+    private InetAddress group;    //gruppo del documento che sto editando
+    
+    private String inEditingDoc;  //mi salvo il documento che sto editando
+    private int inEditingSec;     //relativa sezione del documento
+    
     
     public ControlListener(RegistrationInterface serverInterface)
     {
@@ -79,12 +93,7 @@ public class ControlListener implements ActionListener {
                 server = new Socket(Configuration.SERVER_NAME, Configuration.SERVER_TCP_PORT);
                 toServer = new DataOutputStream(new BufferedOutputStream(server.getOutputStream()));
                 fromServer = new DataInputStream(new BufferedInputStream(server.getInputStream()));
-                
-                
-                
-                
-                
-                
+         
                 Packet req = new Packet(typePack.LOGIN);
                 req.addCampo("username", username);
                 req.addCampo("password", password);
@@ -101,6 +110,7 @@ public class ControlListener implements ActionListener {
                     login.setlabelLog("CAMPI VALIDI", Color.green);
                     login.dispose();
                     logged = new Logged(this);
+                    logged.setTitle(("LOGGED : "+username));
                     logged.show();
                     listingThread = new Thread(new ListingThread(logged, Integer.parseInt((String)req.getCampo("porta"))));
                     listingThread.start();
@@ -268,25 +278,133 @@ public class ControlListener implements ActionListener {
                 }
                 else
                 {
+                    int sezione;
+                    try{sezione = Integer.parseInt(sez);}
+                    catch(Exception exc){
+                        logged.setShowLabel("SEZIONE NON VALIDA", Color.red);
+                        break;
+                    }
+                    req = new Packet(typePack.SHOW_SEC);
+                    req.addCampo("doc", nomeDoc);
+                    req.addCampo("section", Integer.toString(sezione));
+                    req.writePacket(toServer);
                     
+                    req.readPacket(fromServer);
+                    if(req.getType().equals(typePack.OP_ERR))
+                    {
+                        logged.setShowLabel("IL FILE NON ESISTE", Color.red);
+                        break;
+                    }
+                    String editor = req.getCampo("editor");
+                    if(editor.equals(""))
+                        logged.appendShowTextArea(nomeDoc+" ----> "+"free"+"\n\n\n");
+                    else
+                      logged.appendShowTextArea(nomeDoc+" ----> "+editor+" sta editando il documento\n\n\n");
+                    Long dimension = Long.parseLong(req.getCampo("dim"));
+                    receiveDoc(serverChannel, nomeDoc+sezione, dimension);
+                    logged.setShowLabel("DOCUMENTO SCARICATO CON SUCCESSO", Color.green);
+                    break;
                 }
                 
                 
+            }
+            case "edit":
+            {
+                String doc = logged.getEditNameField();
+                String s = logged.getEditNumField();
+                
+                if(doc.equals("") || s.equals("")){
+                    logged.setEditLabel("CAMPI NON VALIDI", Color.red);
+                    break;
+                }
+                int sezione;
+                try{sezione = Integer.parseInt(s);}
+                    catch(Exception exc){
+                        logged.setEditLabel("SEZIONE NON VALIDA", Color.red);
+                        break;
+                    }
+                Packet req = new Packet(typePack.EDIT);
+                req.addCampo("doc", doc);
+                req.addCampo("section", Integer.toString(sezione));
+                req.writePacket(toServer);
+                
+                req.readPacket(fromServer);
+                typePack tipo = req.getType();
+                if(tipo.equals(typePack.OP_ERR))
+                {
+                    logged.setEditLabel("FILE INESISTENTE", Color.red);
+                    break;
+                }
+                else if(tipo.equals(typePack.OP_ERR_SECTION))
+                {
+                    logged.setEditLabel("QUALCUNO STA EDITANDO", Color.red);
+                    break;
+                }
+                else if(tipo.equals(typePack.OP_ERR_NOT_INVITED))
+                {
+                    logged.setEditLabel("NON SEI TRA GLI INVITATI", Color.red);
+                    break;
+                }
+                
+                Long dimension = Long.parseLong(req.getCampo("dim"));
+                receiveDoc(serverChannel, doc+sezione, dimension);
+                String addr = req.getCampo("address");
+                
+                //mi servono per la "end-edit"
+                inEditingDoc = doc;
+                inEditingSec = sezione;
+                
+                editing = new Editing(this);
+                logged.hide();
+                editing.show();
+                
+                chatSocket= new DatagramSocket();
+                group = InetAddress.getByName(addr);
+                chatThread = new Thread(new ChatThread(addr,editing));   //todo chat
+                chatThread.start();
+                break;
+            }
+            
+            case "send-message":
+            {
+                Calendar cal = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                String time ="["+sdf.format(cal.getTime())+"]";
+                byte[] msg = (time+" "+username+" :   "+editing.getMessageTextArea()).getBytes();
+                DatagramPacket packet = new DatagramPacket(msg, msg.length, group, Configuration.CLIENT_CHAT_PORT);
+                chatSocket.send(packet);
+                break;
+            }
+            case "end-edit" :
+            {
+                Packet req = new Packet(typePack.END_EDIT);
+                req.addCampo("doc", inEditingDoc);
+                req.addCampo("section", Integer.toString(inEditingSec));
+                
+                Long dimension = Files.size(Paths.get(Configuration.CLIENT_DOCS_DIRECTORY_NAME+"/"+inEditingDoc+inEditingSec+".txt"));
+                req.addCampo("dimension",Long.toString(dimension));
+                
+                sendSection(serverChannel, inEditingSec, inEditingDoc);
+                req.writePacket(toServer);
+                
+                req.readPacket(fromServer);  //todo fallimento
+                
+                //todo invio richiesta, invio file al server
+                chatSocket.close();
+                group = null;
+                editing.dispose();
+                chatThread.interrupt();
+                logged.show();
+                
+                
+                
+                break;
             }
             
             
     }
     
     }catch(Exception ex){ex.printStackTrace();}
-        /*finally{
-            try
-            {
-                    fromServer.close();
-                    toServer.close();
-                    server.close();
-                    serverChannel.close();
-            }catch(Exception ex2){ex2.printStackTrace();}
-        }*/
     }
     
     //legge dim byte dalla socket e crea il file nella cartella predefinita
@@ -304,6 +422,17 @@ public class ControlListener implements ActionListener {
           fileCh.transferFrom(ch, 0, dimension);
           fileCh.close();
           fis.close();
+    }
+    
+    private void sendSection(SocketChannel channel, int section, String docName) throws FileNotFoundException, IOException
+    {
+        System.out.println("send section: " +channel.toString()+section+docName);
+        FileInputStream fis = new FileInputStream(Configuration.CLIENT_DOCS_DIRECTORY_NAME+"/"+docName+Integer.toString(section)+".txt");
+        FileChannel ch = fis.getChannel();
+        System.out.println(ch.toString());
+        ch.transferTo(0, ch.size(), channel);
+        ch.close();
+        fis.close();
     }
     
     
