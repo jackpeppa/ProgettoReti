@@ -61,7 +61,7 @@ public class Documento {
     // 0 ok, 1 sezione inesistente, 2 occupato, 3 utente non ammesso
     public int richiediSezione(int n, String nome)
     {
-        if(n>numSezioni || n < 0)
+        if(n>=numSezioni || n < 0)
             return 1;
         else if(sezioni[n]==Boolean.TRUE)
             return 2;

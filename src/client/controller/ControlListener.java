@@ -355,6 +355,7 @@ public class ControlListener implements ActionListener {
                 inEditingSec = sezione;
                 
                 editing = new Editing(this);
+                editing.setTitle(username+" sta editando il documento: "+doc);
                 logged.hide();
                 editing.show();
                 

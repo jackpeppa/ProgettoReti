@@ -20,6 +20,7 @@ public class Login extends javax.swing.JFrame {
      */
     public Login(ActionListener al) {
         initComponents();
+        this.getContentPane().setBackground(new Color(196, 196, 196));
         this.al =al;
         this.loginButton.addActionListener(al);
         this.registerButton.addActionListener(al);
@@ -88,17 +89,27 @@ public class Login extends javax.swing.JFrame {
         setLocation(new java.awt.Point(500, 500));
         setResizable(false);
 
-        loginButton.setText("Login");
+        jTabbedPane1.setBackground(new java.awt.Color(196, 196, 196));
+
+        jPanel1.setBackground(new java.awt.Color(196, 196, 196));
+
+        loginButton.setText("LOGIN");
+        loginButton.setActionCommand("Login");
 
         jLabel1.setText("Username");
 
         jLabel2.setText("Password");
 
+        fieldUsernameLog.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+
+        fieldPasswordLog.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         fieldPasswordLog.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldPasswordLogActionPerformed(evt);
             }
         });
+
+        labelLog.setText("aaaa");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -112,9 +123,9 @@ public class Login extends javax.swing.JFrame {
                     .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
+                    .addComponent(labelLog)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(labelLog))
+                    .addComponent(jLabel1))
                 .addContainerGap(73, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -137,7 +148,9 @@ public class Login extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Login", jPanel1);
 
-        registerButton.setText("Registrati");
+        jPanel2.setBackground(new java.awt.Color(196, 196, 196));
+
+        registerButton.setText("REGISTRATI");
         registerButton.setActionCommand("Register");
         registerButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -151,12 +164,14 @@ public class Login extends javax.swing.JFrame {
 
         fieldPasswordReg.setToolTipText("");
 
+        labelReg.setText("aaaa");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(34, 34, 34)
+                .addGap(30, 30, 30)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(fieldUsernameReg, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(fieldPasswordReg, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -166,12 +181,12 @@ public class Login extends javax.swing.JFrame {
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelReg))
-                .addGap(0, 37, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(55, 55, 55)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(63, 63, 63)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(fieldUsernameReg, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -183,7 +198,7 @@ public class Login extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(registerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelReg))
-                .addContainerGap(80, Short.MAX_VALUE))
+                .addContainerGap(72, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Registrazione", jPanel2);

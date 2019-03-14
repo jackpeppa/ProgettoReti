@@ -215,19 +215,22 @@ public class DataBase {
         for(String nomeDoc : docs)
         {
             d = documenti.get(nomeDoc);
-            builder.append(nomeDoc+" :\n");
+            int numSez;
+            builder.append("Nome Documento: "+nomeDoc+" :\n");
             synchronized(d)
             {
                 creatore = d.getCreatore();
                 ammessi = d.getAmmessi();
+                numSez = d.getNumOfSections();
             }
-            builder.append("   Creatore: "+creatore+"\n");
+            builder.append("Creatore: "+creatore+"\n");
+            builder.append("Numero sezioni : "+numSez+"\n");
             builder.append("Collaboratori : ");
             for(String ammesso:ammessi)
             {
                 builder.append(ammesso+", ");
             }
-            builder.append("\n");       
+            builder.append("\n-------------------------------------------------\n\n");       
         }
         return new String(builder);
     }

@@ -5,6 +5,7 @@
  */
 package client.view;
 
+import java.awt.Color;
 import java.awt.event.ActionListener;
 
 /**
@@ -18,6 +19,7 @@ public class Editing extends javax.swing.JFrame {
      */
     public Editing(ActionListener al) {
         initComponents();
+        this.getContentPane().setBackground(new Color(196, 196, 196));
         this.sendMessageButton.addActionListener(al);
         this.endEditButton.addActionListener(al);
     }
@@ -57,6 +59,7 @@ public class Editing extends javax.swing.JFrame {
 
         chatTextArea.setEditable(false);
         chatTextArea.setColumns(20);
+        chatTextArea.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         chatTextArea.setRows(5);
         jScrollPane1.setViewportView(chatTextArea);
 
@@ -65,6 +68,7 @@ public class Editing extends javax.swing.JFrame {
         sendMessageButton.setActionCommand("send-message");
 
         messageTextArea.setColumns(20);
+        messageTextArea.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         messageTextArea.setRows(5);
         jScrollPane2.setViewportView(messageTextArea);
 
@@ -98,13 +102,13 @@ public class Editing extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(sendMessageButton)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(endEditButton)))
-                .addContainerGap(71, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         pack();
