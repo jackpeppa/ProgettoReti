@@ -5,16 +5,9 @@
  */
 package common;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -38,11 +31,6 @@ public class Packet
     {
         jsonObj = new JSONObject();
         jsonObj.put("type", (typePack.DEFAULT).toString());
-    }
-    
-    public Packet(JSONObject obj)
-    {
-        this.jsonObj = obj;
     }
     
     public void setType(typePack tipo)

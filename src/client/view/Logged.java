@@ -27,6 +27,26 @@ public class Logged extends javax.swing.JFrame {
         this.showButton.addActionListener(al);
     }
     
+    public void resetUI()
+    {
+        createNameField.setText("");
+        createNumField.setText("");
+        createLabel.setText("");
+        
+        shareNameField.setText("");
+        shareUsernameField.setText("");
+        shareLabel.setText("");
+        
+        showNameField.setText("");
+        showNumField.setText("");
+        showLabel.setText("");
+        
+        editNameField.setText("");
+        editNumField.setText("");
+        editLabel.setText("");
+        
+    }
+    
     public void setDocTextArea(String par)
     {
         this.docTextArea.setText(par);

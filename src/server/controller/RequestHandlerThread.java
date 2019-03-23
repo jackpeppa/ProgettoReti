@@ -296,7 +296,7 @@ public class RequestHandlerThread implements Runnable {
                }
                 
             }while(flag);
-        }catch(Exception e){e.printStackTrace();}
+        }catch(Exception e){}   //client chiude finestra
         finally
         {
             try
@@ -311,7 +311,7 @@ public class RequestHandlerThread implements Runnable {
                 DataBase.rilasciaSezioni(username);
                 DataBase.setOffline(username);
                 
-            }catch(Exception e){e.printStackTrace();}
+            }catch(Exception e){}
         }
     }
     

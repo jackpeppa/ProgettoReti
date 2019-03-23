@@ -34,6 +34,11 @@ public class Editing extends javax.swing.JFrame {
     {
         return messageTextArea.getText();
     }
+    
+    public void cleanMessageTextArea()
+    {
+        messageTextArea.setText("");
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.

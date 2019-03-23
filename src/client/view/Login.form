@@ -28,12 +28,9 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <EmptySpace min="0" pref="386" max="32767" attributes="0"/>
+          <EmptySpace min="0" pref="417" max="32767" attributes="0"/>
           <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <Component id="jTabbedPane1" min="-2" pref="386" max="-2" attributes="0"/>
-                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-              </Group>
+              <Component id="jTabbedPane1" alignment="0" pref="417" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -86,7 +83,7 @@
                           <Component id="jLabel2" alignment="0" min="-2" pref="86" max="-2" attributes="0"/>
                           <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="73" max="32767" attributes="0"/>
+                      <EmptySpace pref="104" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -154,9 +151,6 @@
               </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="labelLog">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="aaaa"/>
-              </Properties>
             </Component>
           </SubComponents>
         </Container>
@@ -190,7 +184,7 @@
                           <Component id="jLabel4" alignment="0" min="-2" pref="89" max="-2" attributes="0"/>
                           <Component id="labelReg" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="41" max="32767" attributes="0"/>
+                      <EmptySpace pref="72" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -251,9 +245,6 @@
               </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="labelReg">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="aaaa"/>
-              </Properties>
             </Component>
           </SubComponents>
         </Container>

@@ -216,7 +216,7 @@ public class DataBase {
         {
             d = documenti.get(nomeDoc);
             int numSez;
-            builder.append("Nome Documento: "+nomeDoc+" :\n");
+            builder.append("Nome Documento: "+nomeDoc+" \n");
             synchronized(d)
             {
                 creatore = d.getCreatore();

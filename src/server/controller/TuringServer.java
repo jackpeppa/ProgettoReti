@@ -5,24 +5,18 @@
  */
 package server.controller;
 
-import java.io.BufferedReader;
-import java.io.File;
 import server.model.DataBase;
 import common.Configuration;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.NoSuchObjectException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -47,6 +41,7 @@ public class TuringServer {
         
         try
         {   
+            System.setProperty("java.rmi.server.hostname", Configuration.SERVER_NAME);
             registration = new RegistrationImpl(db);
             UnicastRemoteObject.exportObject(registration, 0);
             
@@ -55,8 +50,6 @@ public class TuringServer {
             
             registry.rebind(Configuration.SERVER_RMI_NAME, registration);
             
-            System.out.println(registry.lookup(Configuration.SERVER_RMI_NAME).toString());
-            
             listener = new ServerSocket(Configuration.SERVER_TCP_PORT);
             
             threadpool =(ThreadPoolExecutor) Executors.newFixedThreadPool(Configuration.N_THREADS);
@@ -64,10 +57,11 @@ public class TuringServer {
             Files.createDirectory(Paths.get(Configuration.DOCS_DIRECTORY_NAME));  //dove salvo i files
             }catch(FileAlreadyExistsException ex){}
             
+            System.out.println("TURING SERVER READY");
+            
             while(!(Thread.currentThread().isInterrupted()))
             {
                 Socket client = listener.accept();
-                System.out.println("Connesso client: "+ client.toString());
                 
                 
                 threadpool.execute(new RequestHandlerThread(client));

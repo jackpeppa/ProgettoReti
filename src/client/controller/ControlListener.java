@@ -118,7 +118,7 @@ public class ControlListener implements ActionListener {
                 }
                 else
                 {
-                    login.setlabelLog("CAMPI NON VALIDI", Color.red);
+                    login.setlabelLog("USERNAME/PWD SBAGLIATI", Color.red);
                     fromServer.close();
                     toServer.close();
                     server.close();
@@ -150,9 +150,9 @@ public class ControlListener implements ActionListener {
                 }catch(RemoteException ex){ex.printStackTrace();}
                 
                 if(resp)
-                    login.setlabelReg("REGISTRATO", Color.green);
+                    login.setlabelReg("REGISTRATO", new Color(0, 153, 51));
                 else
-                    login.setlabelReg("CAMPI NON VALIDI", Color.red);
+                    login.setlabelReg("CAMBIA USERNAME", Color.red);
                 
                 break;
                 
@@ -181,6 +181,7 @@ public class ControlListener implements ActionListener {
             {
                 String nome = logged.getCreateNameField();
                 String temp = logged.getCreateNumField();
+                logged.resetUI();
                 if(nome.equals("") || temp.equals("")){
                     logged.setCreateLabel("CAMPI NON VALIDI", Color.red);
                     break;
@@ -208,7 +209,7 @@ public class ControlListener implements ActionListener {
                 req.readPacket(fromServer);
                 
                 if(req.getType().equals(typePack.OP_OK))
-                    logged.setCreateLabel("DOCUMENTO CREATO CON SUCCESSO", Color.green);
+                    logged.setCreateLabel("DOCUMENTO CREATO CON SUCCESSO", new Color(0, 153, 51));
                 else
                     logged.setCreateLabel("SCEGLIERE UN ALTRO NOME", Color.red);
                 
@@ -218,8 +219,10 @@ public class ControlListener implements ActionListener {
             
             case "share":
             {
+                
                 String nomeDoc = logged.getShareNameField();
                 String nomeUser = logged.getShareUsernameField();
+                logged.resetUI();
                 
                 if(nomeDoc.equals("") || nomeUser.equals("")){
                     logged.setShareLabel("CAMPI NON VALIDI", Color.red);
@@ -236,7 +239,7 @@ public class ControlListener implements ActionListener {
                 
                 typePack tipo = req.getType();
                 if(tipo.equals(typePack.OP_OK))
-                    logged.setShareLabel("DOCUMENTO CONDIVISO CON SUCCESSO", Color.green);
+                    logged.setShareLabel("DOCUMENTO CONDIVISO CON SUCCESSO", new Color(0, 153, 51));
                 else
                     logged.setShareLabel("IMPOSSIBILE CONDIVIDERE IL DOCUMENTO", Color.red);
                     
@@ -247,6 +250,7 @@ public class ControlListener implements ActionListener {
             {
                 String nomeDoc = logged.getShowNameField();
                 String sez = logged.getShowNumField();
+                logged.resetUI();
                 
                 if(nomeDoc.equals("")){
                     logged.setShowLabel("INSERIRE NOME DOCUMENTO", Color.red);
@@ -273,7 +277,7 @@ public class ControlListener implements ActionListener {
                     Long dimension = Long.parseLong(req.getCampo("dim"));
                     
                     receiveDoc(serverChannel, nomeDoc, dimension);
-                    logged.setShowLabel("DOCUMENTO SCARICATO CON SUCCESSO", Color.green);
+                    logged.setShowLabel("DOCUMENTO SCARICATO CON SUCCESSO", new Color(0, 153, 51));
                     break;
                 }
                 else
@@ -302,7 +306,7 @@ public class ControlListener implements ActionListener {
                       logged.appendShowTextArea(nomeDoc+" ----> "+editor+" sta editando il documento\n\n\n");
                     Long dimension = Long.parseLong(req.getCampo("dim"));
                     receiveDoc(serverChannel, nomeDoc+sezione, dimension);
-                    logged.setShowLabel("DOCUMENTO SCARICATO CON SUCCESSO", Color.green);
+                    logged.setShowLabel("DOCUMENTO SCARICATO CON SUCCESSO", new Color(0, 153, 51));
                     break;
                 }
                 
@@ -312,6 +316,7 @@ public class ControlListener implements ActionListener {
             {
                 String doc = logged.getEditNameField();
                 String s = logged.getEditNumField();
+                logged.resetUI();
                 
                 if(doc.equals("") || s.equals("")){
                     logged.setEditLabel("CAMPI NON VALIDI", Color.red);
@@ -374,6 +379,7 @@ public class ControlListener implements ActionListener {
                 byte[] msg = (time+" "+username+" :   "+editing.getMessageTextArea()).getBytes();
                 DatagramPacket packet = new DatagramPacket(msg, msg.length, group, Configuration.CLIENT_CHAT_PORT);
                 chatSocket.send(packet);
+                editing.cleanMessageTextArea();
                 break;
             }
             case "end-edit" :

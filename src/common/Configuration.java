@@ -11,7 +11,7 @@ package common;
  */
 public class Configuration {
     public static final String SERVER_NAME="localhost";
-    public static final int SERVER_RMI_PORT= 1099;
+    public static final int SERVER_RMI_PORT= 9997;  //1099
     public static final String SERVER_RMI_NAME = "TURING";
     
     public static final int SERVER_TCP_PORT=9998;  //porta principale
